@@ -1,0 +1,39 @@
+version: 2
+
+# Note on layout: app/, extension/, frontend/ and backend/ are git submodules, so
+# Dependabot cannot see their manifests from this repo. The `gitsubmodule` entry
+# below keeps the pointers current; each submodule repo needs its own copy of this
+# file to get dependency PRs of its own. If the four projects are ever folded into
+# a single repo, replace that entry with per-directory `npm` entries.
+
+updates:
+  # Root npm workspace — the lockfile the release build and CI actually install from.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      # One PR per week for the routine noise; majors still come in separately so
+      # they get read properly (Electron majors in particular need a real test pass).
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    labels:
+      - dependencies
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - ci
+
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies

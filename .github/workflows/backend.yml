@@ -1,0 +1,55 @@
+name: Backend (Discovery)
+
+# Type-check and unit-test the backend (the job index builder and the sign-in API) on PRs and pushes
+# that touch backend/. The index itself is built by job-index.yml; the sign-in API has no deployment
+# here. The trigger lists both 'backend' (a submodule bump changes exactly that path) and
+# 'backend/**'. backend/ has no lockfile of its own, so install happens at the root.
+
+on:
+  push:
+    branches: [main]
+    paths: ['backend', 'backend/**', '.github/workflows/backend.yml']
+  pull_request:
+    paths: ['backend', 'backend/**', '.github/workflows/backend.yml']
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: weavenly
+          POSTGRES_PASSWORD: weavenly
+          POSTGRES_DB: weavenly
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (workspace root)
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: npm ci
+
+      - name: Type check
+        run: npm --workspace backend exec tsc -- --noEmit
+
+      - name: Unit tests
+        run: npm --workspace backend test

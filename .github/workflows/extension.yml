@@ -1,0 +1,46 @@
+name: Extension checks
+
+# Type-check, unit/fixture tests, and manifest↔atsHosts drift check for the Companion extension.
+# The trigger lists both 'extension' (a submodule bump changes exactly that path) and
+# 'extension/**'. The extension is an npm-workspaces member (no own lockfile), so install happens at
+# the repo root; Electron/Playwright binary downloads are skipped — this job never runs them.
+
+on:
+  push:
+    branches: [main]
+    paths: ['extension', 'extension/**', '.github/workflows/extension.yml']
+  pull_request:
+    paths: ['extension', 'extension/**', '.github/workflows/extension.yml']
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (workspace root)
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: npm ci
+
+      - name: Type-check
+        run: npm --workspace extension run check
+
+      - name: Manifest ↔ atsHosts drift check
+        run: npm --workspace extension run check:hosts
+
+      - name: Unit + fixture tests
+        run: npm --workspace extension test
+
+      - name: Build
+        run: npm --workspace extension run build

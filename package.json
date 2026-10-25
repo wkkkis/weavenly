@@ -1,0 +1,37 @@
+{
+	"name": "weavenly-monorepo",
+	"private": true,
+	"license": "AGPL-3.0-or-later",
+	"version": "0.1.0",
+	"description": "Weavenly monorepo — desktop app + landing site + backend",
+	"workspaces": [
+		"app",
+		"frontend",
+		"backend",
+		"extension"
+	],
+	"scripts": {
+		"dev:app": "npm --workspace app run dev",
+		"dev:frontend": "npm --workspace frontend run dev",
+		"dev:backend": "npm --workspace backend run dev",
+		"dev:extension": "npm --workspace extension run watch",
+		"build:app": "npm --workspace app run build",
+		"build:frontend": "npm --workspace frontend run build",
+		"build:backend": "npm --workspace backend run build",
+		"build:extension": "npm --workspace extension run build",
+		"build:all": "npm run build:app && npm run build:frontend && npm run build:backend && npm run build:extension",
+		"package:mac": "npm --workspace app run package:mac",
+		"package:win": "npm --workspace app run package:win",
+		"package:linux": "npm --workspace app run package:linux",
+		"package:all": "npm --workspace app run package:all",
+		"install:all": "npm install"
+	},
+	"engines": {
+		"node": ">=22.12"
+	},
+	"homepage": "https://weavenly.app",
+	"author": {
+		"name": "Iskhak Ishmakhametov",
+		"email": "iskhak.i.codes@gmail.com"
+	}
+}

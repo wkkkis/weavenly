@@ -1,0 +1,16 @@
+[submodule "backend"]
+	path = backend
+	url = git@github.com:wkkkis/weavenly-backend.git
+	branch = main
+[submodule "extension"]
+	path = extension
+	url = git@github.com:wkkkis/weavenly-extension.git
+	branch = main
+[submodule "app"]
+	path = app
+	url = git@github.com:wkkkis/weavenly-app.git
+	branch = main
+[submodule "frontend"]
+	path = frontend
+	url = git@github.com:wkkkis/weavenly-frontend.git
+	branch = main

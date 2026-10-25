@@ -1,0 +1,60 @@
+name: Publish release
+
+# Copies a release's files from R2 releases/<tag>/ to the bucket's root, under the names the site and
+# the in-app updater read: installers first, the update feeds (latest*.yml) last, so an updater never
+# reads a feed that points at a file that isn't there yet. macOS comes as two builds, Apple silicon
+# (Weavenly-arm64.*) and Intel (Weavenly-x64.*); the updater picks by the "arm64" in the name, and
+# Weavenly.dmg stays a copy of the Apple silicon one, for links made before the split. release.yml calls it after all three
+# builds succeeded; run it by hand (Actions → Publish release → tag) to publish or re-publish a tag
+# whose files are already in releases/<tag>/.
+#
+# The files are downloaded and uploaded again, not copied inside the bucket: R2's copy lacks what
+# aws-cli sends (GetObjectTagging for large objects by default, the x-amz-tagging-directive header
+# with --copy-props), while plain uploads work, as the builds' own uploads show.
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag already uploaded to releases/<tag>/, e.g. v0.3.0'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      # aws-cli ≥ 2.23 sends checksum headers by default; Cloudflare's R2 guide asks for these two.
+      AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+      AWS_RESPONSE_CHECKSUM_VALIDATION: WHEN_REQUIRED
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Publish to the bucket's root
+        run: |
+          case "$TAG" in v[0-9]*) ;; *) echo "not a release tag: $TAG"; exit 1 ;; esac
+          EP="https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
+          # a dropped connection now and then (IncompleteRead): each try fetches only what is still missing
+          for i in 1 2 3 4; do
+            aws s3 sync "s3://$R2_BUCKET/releases/$TAG/" out/ --endpoint-url "$EP" && break
+            echo "download try $i failed"; sleep 5
+          done
+          for f in Weavenly-arm64.dmg Weavenly-x64.dmg Weavenly-arm64.zip Weavenly-x64.zip Weavenly-Setup.exe Weavenly.AppImage latest-mac.yml latest.yml latest-linux.yml; do
+            [ -s "out/$f" ] || { echo "releases/$TAG/ has no $f"; exit 1; }
+          done
+          cp out/Weavenly-arm64.dmg out/Weavenly.dmg
+          up() { for i in 1 2 3 4; do aws s3 cp out/ "s3://$R2_BUCKET/" --recursive --endpoint-url "$EP" "$@" && return 0; echo "upload try $i failed"; sleep 5; done; return 1; }
+          up --exclude 'latest*.yml' --cache-control 'max-age=300'
+          up --exclude '*' --include 'latest*.yml' --cache-control 'no-cache'

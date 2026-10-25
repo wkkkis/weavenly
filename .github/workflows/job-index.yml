@@ -1,0 +1,53 @@
+name: Job index
+
+# Builds the public job index every 8 hours and publishes it to R2 (served at https://index.weavenly.app/v1/).
+# The Monday 00:15 UTC run is the weekly one: it also looks for new boards and checks cold and dead boards.
+
+on:
+  schedule:
+    - cron: '15 */8 * * *'
+  workflow_dispatch:
+    inputs:
+      weekly:
+        description: 'Run the weekly pass (new boards, cold and dead boards)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: job-index
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (workspace root)
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: npm ci
+
+      - name: Build and publish
+        env:
+          # The index has its own bucket and its own key; the R2_* secrets without the prefix belong to
+          # release.yml's downloads bucket. Only the account id is shared.
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.INDEX_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.INDEX_R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.INDEX_R2_BUCKET }}
+          INDEX_URL: https://index.weavenly.app/v1
+        # The first run on a Monday (UTC) is the weekly one: it also finds new boards and rechecks cold and
+        # dead ones (isWeeklyRun in the builder decides, so a late start still counts).
+        run: npm --workspace backend run index:build -- --publish ${{ inputs.weekly == true && '--weekly' || '--auto-weekly' }}

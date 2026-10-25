@@ -1,0 +1,43 @@
+name: App checks
+
+# Type-check, unit tests and build of the desktop app (app/ submodule). The trigger lists both
+# 'app' (a submodule bump changes exactly that path) and 'app/**'. Install happens at the root, which
+# owns the lockfile; Electron and Playwright binaries aren't needed here.
+
+on:
+  push:
+    branches: [main]
+    paths: ['app', 'app/**', '.github/workflows/app.yml']
+  pull_request:
+    paths: ['app', 'app/**', '.github/workflows/app.yml']
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (workspace root)
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: npm ci
+
+      - name: Type-check
+        working-directory: app
+        run: npx tsc -p tsconfig.main.json --noEmit && npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm --workspace app test
+
+      - name: Build
+        run: npm --workspace app run build

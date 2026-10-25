@@ -1,0 +1,150 @@
+name: Release Desktop App
+
+# Triggered when a git tag matching v* is pushed.
+# Builds the Weavenly desktop app (app/ submodule) for macOS (signed + notarized, Apple silicon and Intel
+# apart: a universal app is twice the size), Windows (NSIS,
+# unsigned) and Linux (AppImage, unsigned). Each build uploads its files to Cloudflare R2 under
+# releases/<tag>/; only when all three succeeded does the publish job copy them to the bucket's root
+# under the names the site and the in-app updater read: Weavenly-arm64 / -x64 .dmg and .zip, Weavenly-Setup.exe,
+# Weavenly.AppImage and latest*.yml (installers first, update feeds last) — never half a release.
+# The site serves them at https://weavenly.app/download/<file> (frontend/vercel.json redirects to R2).
+# A manual run (workflow_dispatch) without a tag only builds and keeps the files as artifacts.
+#
+# Required repo secrets:
+#   SUBMODULE_PAT                  (fine-grained token, Contents: read on all five weavenly repos;
+#                                   checkout fetches the four private submodules with it)
+#   APPLE_ID                       (Apple ID email)
+#   APPLE_APP_SPECIFIC_PASSWORD    (generated at appleid.apple.com)
+#   APPLE_TEAM_ID                  (from developer.apple.com Membership — electron-builder reads it to notarize)
+#   CSC_LINK                       (base64-encoded .p12 of Developer ID Application cert)
+#   CSC_KEY_PASSWORD               (password for the .p12)
+#   R2_ACCOUNT_ID                  (Cloudflare account ID — the S3 endpoint is <id>.r2.cloudflarestorage.com)
+#   R2_ACCESS_KEY_ID               (R2 API token: Object Read & Write on the bucket)
+#   R2_SECRET_ACCESS_KEY           (its secret)
+#   R2_BUCKET                      (bucket name)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  # Allow manual triggering for testing
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IS_TAG: ${{ startsWith(github.ref, 'refs/tags/v') }}
+  # aws-cli ≥ 2.23 sends checksum headers by default; Cloudflare's R2 guide asks for these two.
+  AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+  AWS_RESPONSE_CHECKSUM_VALIDATION: WHEN_REQUIRED
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # macOS 15, not macos-latest: on the macOS 26.6 image electron-builder can't unlock its own
+        # temporary keychain (SecKeychainUnlock "passphrase not correct", an Apple regression), so
+        # signing fails before it starts. Move up once a newer image signs again.
+        os: [macos-15, windows-latest, ubuntu-latest]
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout source (with submodules)
+        uses: actions/checkout@v4
+        with:
+          # app/ is a gitlink to the private weavenly-app repo — without this the
+          # working dir is empty and `npm ci` fails.
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (workspace root)
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm ci
+
+      - name: Build renderer + main
+        run: npm --workspace app run build
+
+      # macOS signed + notarized builds, Apple silicon and Intel (dmg + zip each; the updater takes the zip)
+      - name: Package (macOS)
+        if: matrix.os == 'macos-15'
+        working-directory: app
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        # Apple's ticket service sometimes drops the connection while stapling, after a successful
+        # notarization ("Failed to staple ... code: 68", v0.3.9 and v0.3.13): build again, up to three times.
+        run: |
+          for n in 1 2 3; do
+            npx electron-builder --mac --publish never && exit 0
+            echo "macOS package attempt $n failed"
+            [ "$n" = 3 ] || sleep 30
+          done
+          exit 1
+
+      # Windows NSIS installer (unsigned until there is a code-signing certificate — SmartScreen warns)
+      - name: Package (Windows)
+        if: matrix.os == 'windows-latest'
+        working-directory: app
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npx electron-builder --win --x64 --publish never
+
+      # Linux AppImage (unsigned)
+      - name: Package (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: app
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npx electron-builder --linux --x64 --publish never
+
+      # This OS's installers + update feed → R2 releases/<tag>/ (not yet visible to anyone).
+      - name: Upload to R2 (releases/<tag>/)
+        if: env.IS_TAG == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          aws s3 cp app/release/ "s3://$R2_BUCKET/releases/$TAG/" --recursive \
+            --exclude '*' --include 'Weavenly*' --include 'latest*.yml' \
+            --endpoint-url "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
+
+      - name: Keep the files as artifacts (a failed build, or a manual run without a tag)
+        if: failure() || env.IS_TAG != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-build-output
+          path: |
+            app/release/Weavenly*
+            app/release/latest*.yml
+          retention-days: 7
+
+  # All three builds succeeded: copy them to the bucket's root (publish-release.yml).
+  publish:
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/v')
+    uses: ./.github/workflows/publish-release.yml
+    with:
+      tag: ${{ github.ref_name }}
+    secrets: inherit

@@ -1,0 +1,24 @@
+name: Job index format
+
+# The builder (backend) and the app read the same index format. Their two copies of the format module and
+# of the sample fixture must stay identical.
+
+on:
+  push:
+    branches: [main]
+    paths: ['app', 'app/**', 'backend', 'backend/**', '.github/workflows/job-index-format.yml']
+  pull_request:
+    paths: ['app', 'app/**', 'backend', 'backend/**', '.github/workflows/job-index-format.yml']
+
+jobs:
+  same:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+      - name: The two format copies match
+        run: |
+          cmp backend/src/job-index/format.ts app/src/discovery/index-format.ts
+          cmp backend/src/job-index/__tests__/fixtures/job-index-sample.v1.json app/src/discovery/__tests__/fixtures/job-index-sample.v1.json

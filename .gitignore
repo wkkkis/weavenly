@@ -1,0 +1,72 @@
+# Root-level monorepo .gitignore.
+# Each subproject (app/, frontend/, backend/) may have its own .gitignore for
+# specifics. This file covers things that should never be committed regardless
+# of location.
+
+# Dependencies (per-project node_modules)
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/release/
+**/.astro/
+app/dist/
+app/release/
+frontend/dist/
+backend/dist/
+
+# Logs
+*.log
+**/*.log
+
+# Environment & secrets
+.env
+.env.local
+**/.env
+**/.env.local
+!**/.env.example
+
+# Editor / OS
+.DS_Store
+**/.DS_Store
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# App local data — user's private data, NEVER commit.
+# The entire data dir is runtime-generated and contains the user's résumés,
+# cover letters, company/vacancy data, Gmail tokens, and the BYOK API key in
+# settings.json. (Previously only some sub-paths were ignored, which leaked
+# settings.json + company data into git — see stage/m0 SEC-4.)
+app/data/
+
+# Backend
+backend/data/
+
+# Temp
+**/tmp/
+**/*.tmp
+
+# Generated icons (committed source SVG only; PNGs/ICOs regenerated)
+# Comment these in once icons are stable to commit them:
+# app/build/icon.png
+# app/build/icon.ico
+# app/build/icon.icns
+# app/build/dmg-background.png
+
+# Internal working docs — analysis / audit / plan / staged tasks.
+# Local-only: NOT product code, keep out of the published repo.
+simplify-docs/
+ecosystem-docs/
+compare-docs/
+launch-docs/
+
+# This monorepo is npm-workspaces (package-lock.json is the source of truth and
+# what CI's `npm ci` reads). A stray yarn.lock resolves a different dependency
+# graph than CI and release builds — keep it out of the repo.
+yarn.lock
+**/yarn.lock
+
+# brainstorm mockups (visual companion)
+.superpowers/

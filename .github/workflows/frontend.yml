@@ -1,0 +1,51 @@
+name: Frontend (landing)
+
+# Type-check (astro check), unit-test and build the Astro site on PRs and pushes to main. Deployment is
+# handled by Vercel via its Git integration — this workflow exists so PRs see a green check before merge. The trigger
+# lists both 'frontend' (a submodule bump changes exactly that path) and 'frontend/**'. frontend/ has
+# no lockfile of its own, so install happens at the root workspace.
+
+on:
+  push:
+    branches: [main]
+    paths: ['frontend', 'frontend/**', '.github/workflows/frontend.yml']
+  pull_request:
+    paths: ['frontend', 'frontend/**', '.github/workflows/frontend.yml']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (workspace root)
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: npm ci
+
+      - name: Type-check
+        run: npm --workspace frontend run check
+
+      - name: Unit tests
+        run: npm --workspace frontend test
+
+      - name: Build static site
+        run: npm --workspace frontend run build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: landing-site
+          path: frontend/dist/
+          retention-days: 7
