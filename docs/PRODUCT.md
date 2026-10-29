@@ -75,7 +75,7 @@ it). The site's tokens are in [`../frontend/README.md`](../frontend/README.md), 
 
 ## Status
 
-- **Desktop app** — v0.3.13, downloadable from weavenly.app (macOS 13+ on Apple silicon and Intel, signed
+- **Desktop app** — v0.3.14, downloadable from weavenly.app (macOS 13+ on Apple silicon and Intel, signed
   and notarized; Windows and Linux unsigned), with in-app updates. See `launch-docs/release-checklist.md`.
 - **Extension** — 1.0.2, public in the Chrome Web Store since 2026-10-19.
 - **Job index** — built and published every 8 hours to `index.weavenly.app`.
