@@ -72,7 +72,8 @@ running when its window is closed, so the extension can always reach it.
 - **Résumé tailoring**: a truthful AI rewrite with a before/after diff, a résumé library with best-fit
   pick, PDF and DOCX.
 - **Mail**: IMAP/SMTP with an app password; heuristic sorting first, the LLM only on uncertain mail;
-  suspicious mail kept apart.
+  suspicious mail kept apart. An interview invite for a job applied to elsewhere becomes that job, with a
+  short interview prep.
 - **Daily goal**, follow-ups, interview transcripts; English and Russian.
 - **Storage**: a `data/` folder of JSON/JSONL you own. Secrets (AI key, ChatGPT sign-in, mail password) are
   encrypted at rest through the OS keychain.
