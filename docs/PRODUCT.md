@@ -33,7 +33,10 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   (sender domain, ATS patterns, keywords), with the LLM only on the uncertain cases. The inbox has tabs for
   interviews, replies, results, recruiters, mail not linked to a job yet, and **suspicious** mail (fake
   recruiters are kept apart and never change a job). A rejection for a job you applied to, even from a hiring
-  system's shared address (Greenhouse, Lever, Ashby, Workday), closes the job and shows a notification. Follow-ups, interview transcripts, and a **daily goal**
+  system's shared address (Greenhouse, Lever, Ashby, Workday), closes the job and shows a notification. An
+  interview invite for a job you applied to elsewhere (LinkedIn, by email, through an agency) becomes that job
+  at Interview, with its description looked up and a short **interview prep**: what the company is, what the
+  round covers and what to have ready, what to ask, and the steps to an offer. Follow-ups, interview transcripts, and a **daily goal**
   (10 applications by default, a streak that survives weekends, one evening reminder).
 
 The app speaks English and Russian.
