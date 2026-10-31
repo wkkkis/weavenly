@@ -8,6 +8,7 @@ name: Release Desktop App
 # under the names the site and the in-app updater read: Weavenly-arm64 / -x64 .dmg and .zip, Weavenly-Setup.exe,
 # Weavenly.AppImage and latest*.yml (installers first, update feeds last) — never half a release.
 # The site serves them at https://weavenly.app/download/<file> (frontend/vercel.json redirects to R2).
+# A tag first checks that every secret it needs is set, and stops naming the missing ones.
 # A manual run (workflow_dispatch) without a tag only builds and keeps the files as artifacts.
 #
 # Required repo secrets:
@@ -56,6 +57,32 @@ jobs:
         shell: bash
 
     steps:
+      # A tag publishes, so every secret it needs must be set: the run stops at once and names the missing ones
+      # (2026-10-30: v0.3.14 built for three minutes, then failed on an empty bucket name and on "app not a file",
+      # electron-builder's words for a missing signing certificate).
+      - name: Check the release secrets
+        if: env.IS_TAG == 'true'
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID != '' }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID != '' }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY != '' }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET != '' }}
+          APPLE_ID: ${{ secrets.APPLE_ID != '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD != '' }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID != '' }}
+          CSC_LINK: ${{ secrets.CSC_LINK != '' }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD != '' }}
+          IS_MAC: ${{ matrix.os == 'macos-15' }}
+        run: |
+          need="R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET"
+          if [ "$IS_MAC" = true ]; then need="$need APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID CSC_LINK CSC_KEY_PASSWORD"; fi
+          missing=""
+          for s in $need; do [ "${!s}" = true ] || missing="$missing $s"; done
+          if [ -n "$missing" ]; then
+            echo "::error::Repository secrets not set:$missing. Add them in Settings > Secrets and variables > Actions (launch-docs/release-checklist.md, section 2)."
+            exit 1
+          fi
+
       - name: Checkout source (with submodules)
         uses: actions/checkout@v4
         with:
