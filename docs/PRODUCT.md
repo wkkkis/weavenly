@@ -36,8 +36,11 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   system's shared address (Greenhouse, Lever, Ashby, Workday), closes the job and shows a notification. An
   interview invite for a job you applied to elsewhere (LinkedIn, by email, through an agency) becomes that job
   at Interview, with its description looked up and a short **interview prep**: what the company is, what the
-  round covers and what to have ready, what to ask, and the steps to an offer. Follow-ups, interview transcripts, and a **daily goal**
-  (10 applications by default, a streak that survives weekends, one evening reminder).
+  round covers and what to have ready, what to ask, and the steps to an offer. **Follow-ups** come drafted: your AI
+  fills in why this job and what you talked about, an email with a bracket left in it can't be sent, and the
+  address is whoever at the company wrote about the job, or one the posting lists (never a guessed one). Also
+  interview transcripts and a **daily goal** (10 applications by default, a streak that survives weekends, one
+  evening reminder).
 
 The app speaks English and Russian.
 
