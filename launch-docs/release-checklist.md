@@ -1,7 +1,7 @@
 # Releasing Weavenly: owner checklist
 
 How a desktop release is built and published, and the one-time setup it needs. The pipeline is live:
-the tags `v0.3.5` … `v0.3.14` went out through it.
+the tags `v0.3.5` … `v0.3.13` went out through it.
 
 Already set up:
 - `weavenly.app` DNS is at Cloudflare;
@@ -64,8 +64,10 @@ Paste secrets without a trailing newline.
    docs if the release changes what they say; see `CLAUDE.md`).
 2. Push `main` to GitHub. The checks run on the push.
 3. `git tag v0.x.y && git push origin v0.x.y` in the root repo.
-4. `release.yml` runs: three builds, then the upload to `releases/v0.x.y/`, then `publish-release.yml`
-   copies them to the bucket's root.
+4. `release.yml` runs. First each build checks that the secrets from §2 it needs are set, and stops naming
+   any that are missing. Then three builds, the upload to `releases/v0.x.y/`, and `publish-release.yml`
+   copies them to the bucket's root. After adding a missing secret, re-run the failed run (Actions → the run
+   → Re-run failed jobs): the tag stays.
 5. **Check.** `https://weavenly.app/download/Weavenly-arm64.dmg` (and `Weavenly-x64.dmg`, `.exe`,
    `.AppImage`) downloads, and `…/download/latest-mac.yml` shows the new version.
 
