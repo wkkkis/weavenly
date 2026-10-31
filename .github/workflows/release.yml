@@ -84,7 +84,7 @@ jobs:
           fi
 
       - name: Checkout source (with submodules)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # app/ is a gitlink to the private weavenly-app repo — without this the
           # working dir is empty and `npm ci` fails.
