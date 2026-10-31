@@ -1,7 +1,7 @@
 # Releasing Weavenly: owner checklist
 
 How a desktop release is built and published, and the one-time setup it needs. The pipeline is live:
-the tags `v0.3.5` … `v0.3.14` went out through it.
+the tags `v0.3.5` … `v0.3.15` went out through it.
 
 Already set up:
 - `weavenly.app` DNS is at Cloudflare;
