@@ -91,14 +91,18 @@ in the job's history; the person clicks Submit. See [`extension/README.md`](./ex
 ### `frontend/` — the site
 
 Astro, plain CSS, English and Russian, deployed on Vercel. Home, What's new, Privacy, Terms, the job index
-page, downloads and the extension link. See [`frontend/README.md`](./frontend/README.md).
+page, the Windows page, What's next after a download, the H-1B sponsor pages (`/h1b`, one per employer with 20+
+filings, built from the published data), downloads and the extension link. See [`frontend/README.md`](./frontend/README.md).
 
-### `backend/` — job index and sign-in
+### `backend/` — job index, H-1B data and sign-in
 
 - **The public job index**: reads public ATS job lists (Greenhouse, Lever, Ashby, Workable,
   SmartRecruiters, Recruitee, Personio, Teamtailor, Breezy, Pinpoint, BambooHR, Rippling, Workday) for
   ~37,000 company boards every 8 hours and publishes compact static files to `index.weavenly.app/v1/`. No
   descriptions, no personal data, no API.
+- **H-1B and green card data**: once a month checks the U.S. Department of Labor's quarterly LCA and PERM
+  disclosure files and, when there are new ones, publishes each employer's certified filings by occupation
+  and state to `index.weavenly.app/v1/visa/`. The app shows them beside US jobs.
 - **Magic-link sign-in** (Fastify + Postgres): kept for possible server features; the app doesn't use it.
 
 See [`backend/README.md`](./backend/README.md) and [`ARCHITECTURE-BACKEND.md`](./ARCHITECTURE-BACKEND.md).
@@ -111,8 +115,10 @@ See [`backend/README.md`](./backend/README.md) and [`ARCHITECTURE-BACKEND.md`](.
 | `extension.yml` | … `extension` | type-check, manifest ↔ `atsHosts` drift check, tests, build |
 | `frontend.yml` | … `frontend` | `astro check`, unit tests, build (Vercel deploys through its Git integration) |
 | `backend.yml` | … `backend` | type-check and unit tests |
-| `job-index-format.yml` | … `app` or `backend` | the two copies of the job index format and its fixture are identical |
+| `job-index-format.yml` | … `app`, `backend` or `frontend` | the two copies of the job index format and its fixture, and of the H-1B data format, are identical |
 | `job-index.yml` | every 8 hours (+ by hand) | builds and publishes the job index; the Monday run also finds new boards |
+| `visa-data.yml` | the 3rd of each month (+ by hand) | builds and publishes the H-1B and green card data when the Department of Labor has newer files |
+| `site-refresh.yml` | daily (+ by hand) | asks Vercel to rebuild the site, so the `/h1b` pages carry fresh data and open jobs (needs `VERCEL_DEPLOY_HOOK`) |
 | `release.yml` | a `v*` tag (+ by hand as a dry run) | macOS (signed, notarized), Windows, Linux builds → R2 `releases/<tag>/` |
 | `publish-release.yml` | called by `release.yml` (+ by hand) | copies a release to the bucket root: installers first, update feeds last |
 

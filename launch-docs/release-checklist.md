@@ -39,17 +39,19 @@ Already set up:
    `RELEASES_LIVE` on, the site build fails if that URL (or the Chrome Web Store link) is missing.
 
 The public job index has its **own** bucket and key (served at `https://index.weavenly.app/v1/`); see
-`.github/workflows/job-index.yml`.
+`.github/workflows/job-index.yml`. The H-1B data (`.github/workflows/visa-data.yml`) goes to the same bucket
+under `v1/visa/`.
 
 ## 2. Actions secrets (root repo → Settings → Secrets and variables → Actions)
 
 | Secret | Used by | What |
 |---|---|---|
 | `SUBMODULE_PAT` | every workflow | Fine-grained token with **Contents: read** on **all five** repos: `weavenly`, `weavenly-app`, `weavenly-extension`, `weavenly-frontend`, `weavenly-backend`. The root is public; the four submodules are private, and checkout fetches them with this token. |
-| `R2_ACCOUNT_ID` | release, publish, job index | Cloudflare account ID (dashboard → R2 → right column) |
+| `R2_ACCOUNT_ID` | release, publish, job index, visa data | Cloudflare account ID (dashboard → R2 → right column) |
 | `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | release, publish | the downloads bucket's R2 API token from §1.3 |
 | `R2_BUCKET` | release, publish | the downloads bucket's name |
-| `INDEX_R2_ACCESS_KEY_ID` / `INDEX_R2_SECRET_ACCESS_KEY` / `INDEX_R2_BUCKET` | job index | the job index bucket and its own token |
+| `INDEX_R2_ACCESS_KEY_ID` / `INDEX_R2_SECRET_ACCESS_KEY` / `INDEX_R2_BUCKET` | job index, visa data | the job index bucket and its own token |
+| `VERCEL_DEPLOY_HOOK` | site refresh | optional: a Vercel deploy hook URL for the site's `main` (Vercel → project → Settings → Git → Deploy Hooks); the daily `site-refresh.yml` posts to it so the `/h1b` pages rebuild |
 | `APPLE_ID` | release (macOS) | Apple ID email of the developer account |
 | `APPLE_APP_SPECIFIC_PASSWORD` | release (macOS) | app-specific password from appleid.apple.com |
 | `APPLE_TEAM_ID` | release (macOS) | Team ID (developer.apple.com → Membership); electron-builder reads it to notarize |
