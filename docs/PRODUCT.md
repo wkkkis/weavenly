@@ -14,8 +14,8 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   its résumé, its color and its job search. Switch with a two-finger swipe on the sidebar or Ctrl+1…9; the
   extension's open panel follows.
 - **Find** — every few hours the app downloads a public index of open jobs (Greenhouse, Lever, Ashby,
-  Workable, SmartRecruiters, Recruitee, Personio, Teamtailor, Breezy, Pinpoint, BambooHR, Rippling and
-  Workday boards, built by `backend/`) and reads five remote job boards, then matches them to each role
+  Workable, SmartRecruiters, Recruitee, Personio, Teamtailor, Breezy, Pinpoint, BambooHR, Rippling, Workday,
+  iCIMS, Taleo, SuccessFactors, Jobvite, Oracle Cloud and Eightfold boards, built by `backend/`) and reads five remote job boards, then matches them to each role
   **on your computer**. The best show up under **Found** on the Jobs page; AI rates up to 10 new ones per
   role per day (a setting; 0 turns it off). Under each US job a line says what the employer filed for
   **H-1B** and green cards: filings for this kind of role in the job's state, the usual wage level and the
@@ -32,7 +32,7 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   criminal record, right to work and visas, race and gender), which it asks you. Every fill is kept in the
   job's history. **You always click Submit.**
 - **Track** — jobs move through Saved → Applied → Interview → Offer → Closed. Mail is read over IMAP with an
-  app password (Gmail, Yandex, Mail.ru, iCloud, Yahoo or any server) and sorted **mostly by heuristics**
+  app password (Gmail, Yandex, Mail.ru, iCloud, Yahoo, each set up step by step with pictures, or any server) and sorted **mostly by heuristics**
   (sender domain, ATS patterns, keywords), with the LLM only on the uncertain cases. The inbox has tabs for
   interviews, replies, results, recruiters, mail not linked to a job yet, and **suspicious** mail (fake
   recruiters are kept apart and never change a job). A rejection for a job you applied to, even from a hiring
@@ -44,6 +44,9 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   address is whoever at the company wrote about the job, or one the posting lists (never a guessed one). Also
   interview transcripts and a **daily goal** (10 applications by default, a streak that survives weekends, one
   evening reminder).
+- **Your AI assistant** — off until you turn it on in Settings: then Claude Desktop or Claude Code on your
+  computer can read your job search (jobs, résumés, found jobs, follow-ups, the daily goal) through a local,
+  read-only server. It never gets your passwords, keys, About you, form answers or the text of your emails.
 
 The app speaks English and Russian.
 
