@@ -55,8 +55,8 @@ Five repos: the root `weavenly` and four submodules.
 |-----|------------|-------|
 | **`app/`** | The product — desktop app for macOS, Windows and Linux; also runs the local server the extension talks to. | Electron + React + Vite + TS |
 | **`extension/`** | Browser extension that fills application forms from your résumé, published in the Chrome Web Store. | MV3 + esbuild + TS |
-| **`frontend/`** | The site, weavenly.app, in English and Russian, with English H-1B sponsor pages built from the published data and a dated, sourced H-1B rules page. | Astro, plain CSS |
-| **`backend/`** | The public job index builder (runs every 8 hours in GitHub Actions, publishes static files), the H-1B data builder (monthly) and a magic-link sign-in API the app doesn't use. | TS, Cloudflare R2; Fastify + Postgres |
+| **`frontend/`** | The site, weavenly.app, in English and Russian, with English H-1B sponsor pages built from the published data, a dated, sourced H-1B rules page and the weekly hiring report. | Astro, plain CSS |
+| **`backend/`** | The public job index builder (runs every 8 hours in GitHub Actions, publishes static files), the H-1B data builder (monthly), the weekly hiring report and a magic-link sign-in API the app doesn't use. | TS, Cloudflare R2; Fastify + Postgres |
 
 The desktop app and the extension talk over a **local** server (`127.0.0.1:9217`) — nothing routes through
 a cloud. The job index is the same files for everyone; what a person searches for never leaves their
@@ -87,6 +87,8 @@ it). The site's tokens are in [`../frontend/README.md`](../frontend/README.md), 
 - **Job index** — built and published every 8 hours to `index.weavenly.app`.
 - **H-1B data** — checked monthly, published to `index.weavenly.app/v1/visa/` when the Department of Labor
   has newer files.
+- **Hiring report** — every Monday, the jobs the index first saw in the week before, published to
+  `index.weavenly.app/v1/report/` with ready LinkedIn and Threads posts, and shown at `weavenly.app/hiring-report`.
 - **Sign-in API** — exists in `backend/`; nothing in the app needs an account.
 
 Work happens on feature branches merged into `main`; designs and plans are dated documents in

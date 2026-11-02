@@ -1,7 +1,8 @@
 name: Site refresh
 
 # Asks Vercel for a fresh production build of weavenly.app once a day, so the /h1b pages carry the newest H-1B data
-# and today's open jobs from the job index (both are read at build time). It needs the VERCEL_DEPLOY_HOOK secret
+# and today's open jobs from the job index, and /hiring-report the newest week (all read at build time;
+# hiring-report.yml also asks for a build after it publishes a week). It needs the VERCEL_DEPLOY_HOOK secret
 # (Vercel → the site's project → Settings → Git → Deploy Hooks, branch main); without it the run does nothing.
 
 on:
