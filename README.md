@@ -92,7 +92,8 @@ in the job's history; the person clicks Submit. See [`extension/README.md`](./ex
 
 Astro, plain CSS, English and Russian, deployed on Vercel. Home, What's new, Privacy, Terms, the job index
 page, the Windows page, What's next after a download, the H-1B sponsor pages (`/h1b`, one per employer with 20+
-filings, built from the published data), downloads and the extension link. See [`frontend/README.md`](./frontend/README.md).
+filings, built from the published data), H-1B rules now (`/h1b/rules`, dated and sourced), downloads and the extension
+link. See [`frontend/README.md`](./frontend/README.md).
 
 ### `backend/` — job index, H-1B data and sign-in
 
@@ -102,7 +103,8 @@ filings, built from the published data), downloads and the extension link. See [
   descriptions, no personal data, no API.
 - **H-1B and green card data**: once a month checks the U.S. Department of Labor's quarterly LCA and PERM
   disclosure files and, when there are new ones, publishes each employer's certified filings by occupation
-  and state to `index.weavenly.app/v1/visa/`. The app shows them beside US jobs.
+  and state to `index.weavenly.app/v1/visa/`. The app shows them beside US jobs, and the extension's panel on a
+  US job's page.
 - **Magic-link sign-in** (Fastify + Postgres): kept for possible server features; the app doesn't use it.
 
 See [`backend/README.md`](./backend/README.md) and [`ARCHITECTURE-BACKEND.md`](./ARCHITECTURE-BACKEND.md).
