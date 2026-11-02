@@ -17,7 +17,10 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   Workable, SmartRecruiters, Recruitee, Personio, Teamtailor, Breezy, Pinpoint, BambooHR, Rippling and
   Workday boards, built by `backend/`) and reads five remote job boards, then matches them to each role
   **on your computer**. The best show up under **Found** on the Jobs page; AI rates up to 10 new ones per
-  role per day (a setting; 0 turns it off).
+  role per day (a setting; 0 turns it off). Under each US job a line says what the employer filed for
+  **H-1B** and green cards: filings for this kind of role in the job's state, the usual wage level and the
+  median wage offered, from the U.S. Department of Labor's quarterly files (hidden if you don't need
+  sponsorship).
 - **Tailor** — an LLM rewrites your summary, bullets and skills to match the job **truthfully** (a job's
   keyword is woven in only when your résumé already grounds it; anything it can't ground is flagged) and
   shows a before/after **diff**. A **résumé library** keeps several versions and picks the best fit per job
@@ -52,8 +55,8 @@ Five repos: the root `weavenly` and four submodules.
 |-----|------------|-------|
 | **`app/`** | The product — desktop app for macOS, Windows and Linux; also runs the local server the extension talks to. | Electron + React + Vite + TS |
 | **`extension/`** | Browser extension that fills application forms from your résumé, published in the Chrome Web Store. | MV3 + esbuild + TS |
-| **`frontend/`** | The site, weavenly.app, in English and Russian. | Astro, plain CSS |
-| **`backend/`** | The public job index builder (runs every 8 hours in GitHub Actions, publishes static files) and a magic-link sign-in API the app doesn't use. | TS, Cloudflare R2; Fastify + Postgres |
+| **`frontend/`** | The site, weavenly.app, in English and Russian, with English H-1B sponsor pages built from the published data. | Astro, plain CSS |
+| **`backend/`** | The public job index builder (runs every 8 hours in GitHub Actions, publishes static files), the H-1B data builder (monthly) and a magic-link sign-in API the app doesn't use. | TS, Cloudflare R2; Fastify + Postgres |
 
 The desktop app and the extension talk over a **local** server (`127.0.0.1:9217`) — nothing routes through
 a cloud. The job index is the same files for everyone; what a person searches for never leaves their
@@ -82,6 +85,8 @@ it). The site's tokens are in [`../frontend/README.md`](../frontend/README.md), 
   and notarized; Windows and Linux unsigned), with in-app updates. See `launch-docs/release-checklist.md`.
 - **Extension** — 1.0.2, public in the Chrome Web Store since 2026-10-19.
 - **Job index** — built and published every 8 hours to `index.weavenly.app`.
+- **H-1B data** — checked monthly, published to `index.weavenly.app/v1/visa/` when the Department of Labor
+  has newer files.
 - **Sign-in API** — exists in `backend/`; nothing in the app needs an account.
 
 Work happens on feature branches merged into `main`; designs and plans are dated documents in

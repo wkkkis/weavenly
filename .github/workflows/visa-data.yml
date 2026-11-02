@@ -1,0 +1,53 @@
+name: Visa data
+
+# Builds the H-1B and green card data from the U.S. Department of Labor's quarterly disclosure files (LCA and PERM,
+# linked from https://www.dol.gov/agencies/eta/foreign-labor/performance) and publishes it next to the job index
+# (https://index.weavenly.app/v1/visa/manifest.json and visa/h1b.v1.<sha>.json.gz). It runs on the 3rd of each
+# month; when the published data already comes from the newest files it stops after reading the page.
+
+on:
+  schedule:
+    - cron: '40 4 3 * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Rebuild and publish even if the published data comes from the newest files'
+        type: boolean
+        default: false
+
+concurrency:
+  group: visa-data
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (workspace root)
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: npm ci
+
+      - name: Build and publish
+        env:
+          # The job index's bucket and key: the data is served from the same address.
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.INDEX_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.INDEX_R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.INDEX_R2_BUCKET }}
+          # the LCA file has about 700 000 rows; the builder keeps one entry per employer, occupation and state
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: npm --workspace backend run visa:build -- --fetch --publish ${{ inputs.force == true && '--force' || '' }}

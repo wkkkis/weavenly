@@ -48,7 +48,9 @@ The same commands CI runs (`.github/workflows/`):
   `npm --workspace frontend run build`
 - Backend: `npm --workspace backend exec tsc -- --noEmit` and `npm --workspace backend test`
 - Job index format: `backend/src/job-index/format.ts` and `app/src/discovery/index-format.ts` must stay
-  identical (`job-index-format.yml` compares them)
+  identical, and so must `backend/src/visa/format.ts`, `app/src/discovery/visa-format.ts` and
+  `frontend/src/lib/visa-format.ts`
+  (`job-index-format.yml` compares them)
 
 Some tests read across projects (for example the app checks that its copies of shared files match the
 extension's and the site's), so run them from a recursive clone of this repo.

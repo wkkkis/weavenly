@@ -37,9 +37,9 @@ In scope:
 - **Companion HTTP server** (`app/src/companion/server.ts`) — the loopback
   service on `127.0.0.1:9217` that the extension talks to.
 - **Companion extension** (`extension/`) — content scripts and service worker.
-- **Backend** (`backend/`) — the job index builder (what it fetches and the
-  files it publishes to `index.weavenly.app`), and the sign-in API only if you
-  can reach a deployed instance.
+- **Backend** (`backend/`) — the job index and H-1B data builders (what they
+  fetch and the files they publish to `index.weavenly.app`), and the sign-in
+  API only if you can reach a deployed instance.
 
 Out of scope:
 
