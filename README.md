@@ -71,13 +71,16 @@ running when its window is closed, so the extension can always reach it.
   from the public job index and five remote boards.
 - **Résumé tailoring**: a truthful AI rewrite with a before/after diff, a résumé library with best-fit
   pick, PDF and DOCX.
-- **Mail**: IMAP/SMTP with an app password; heuristic sorting first, the LLM only on uncertain mail;
+- **Mail**: IMAP/SMTP with an app password, set up step by step for Gmail, iCloud, Yahoo, Yandex and Mail.ru;
+  heuristic sorting first, the LLM only on uncertain mail;
   suspicious mail kept apart. An interview invite for a job applied to elsewhere becomes that job, with a
   short interview prep.
 - **Daily goal**, follow-ups, interview transcripts; English and Russian.
 - **Storage**: a `data/` folder of JSON/JSONL you own. Secrets (AI key, ChatGPT sign-in, mail password) are
   encrypted at rest through the OS keychain.
 - **AI**: your ChatGPT or Claude plan, an Anthropic or OpenAI key, or local Ollama. No proxy.
+- **Your AI assistant** (off by default): a read-only MCP server over stdio, so Claude Desktop or Claude Code on
+  the same computer can read the jobs, résumés, found jobs and follow-ups; never secrets or email text.
 - **Companion server**: `127.0.0.1:9217`, the extension's only way in (pair code → bearer token).
 
 See [`app/README.md`](./app/README.md) and [`app/ARCHITECTURE.md`](./app/ARCHITECTURE.md).
@@ -92,19 +95,24 @@ in the job's history; the person clicks Submit. See [`extension/README.md`](./ex
 
 Astro, plain CSS, English and Russian, deployed on Vercel. Home, What's new, Privacy, Terms, the job index
 page, the Windows page, What's next after a download, the H-1B sponsor pages (`/h1b`, one per employer with 20+
-filings, built from the published data), H-1B rules now (`/h1b/rules`, dated and sourced), downloads and the extension
-link. See [`frontend/README.md`](./frontend/README.md).
+filings, built from the published data), H-1B rules now (`/h1b/rules`, dated and sourced), What Weavenly sends (`/what-we-send`, every request the app and
+the extension make), the recruiter check (`/recruiter-check`, scam signs in an email, in the browser), the weekly hiring report
+(`/hiring-report`, one page per week, built from the published report), downloads and the extension link. See
+[`frontend/README.md`](./frontend/README.md).
 
-### `backend/` — job index, H-1B data and sign-in
+### `backend/` — job index, H-1B data, hiring report and sign-in
 
 - **The public job index**: reads public ATS job lists (Greenhouse, Lever, Ashby, Workable,
-  SmartRecruiters, Recruitee, Personio, Teamtailor, Breezy, Pinpoint, BambooHR, Rippling, Workday) for
-  ~37,000 company boards every 8 hours and publishes compact static files to `index.weavenly.app/v1/`. No
+  SmartRecruiters, Recruitee, Personio, Teamtailor, Breezy, Pinpoint, BambooHR, Rippling, Workday, iCIMS, Taleo,
+  SuccessFactors, Jobvite, Oracle Cloud, Eightfold) for ~43,000 company boards every 8 hours and publishes compact static files to `index.weavenly.app/v1/`. No
   descriptions, no personal data, no API.
 - **H-1B and green card data**: once a month checks the U.S. Department of Labor's quarterly LCA and PERM
   disclosure files and, when there are new ones, publishes each employer's certified filings by occupation
   and state to `index.weavenly.app/v1/visa/`. The app shows them beside US jobs, and the extension's panel on a
   US job's page.
+- **Weekly hiring report**: every Monday counts the jobs the index first saw in the week before (on boards it already
+  read), by area, US state and company, with the share at employers with H-1B filings, and publishes it with ready
+  LinkedIn and Threads posts to `index.weavenly.app/v1/report/`. The site's `/hiring-report` pages show it.
 - **Magic-link sign-in** (Fastify + Postgres): kept for possible server features; the app doesn't use it.
 
 See [`backend/README.md`](./backend/README.md) and [`ARCHITECTURE-BACKEND.md`](./ARCHITECTURE-BACKEND.md).
@@ -117,10 +125,11 @@ See [`backend/README.md`](./backend/README.md) and [`ARCHITECTURE-BACKEND.md`](.
 | `extension.yml` | … `extension` | type-check, manifest ↔ `atsHosts` drift check, tests, build |
 | `frontend.yml` | … `frontend` | `astro check`, unit tests, build (Vercel deploys through its Git integration) |
 | `backend.yml` | … `backend` | type-check and unit tests |
-| `job-index-format.yml` | … `app`, `backend` or `frontend` | the two copies of the job index format and its fixture, and of the H-1B data format, are identical |
+| `job-index-format.yml` | … `app`, `backend` or `frontend` | the copies of the job index format and its fixture, of the H-1B data format and of the hiring report format are identical |
 | `job-index.yml` | every 8 hours (+ by hand) | builds and publishes the job index; the Monday run also finds new boards |
 | `visa-data.yml` | the 3rd of each month (+ by hand) | builds and publishes the H-1B and green card data when the Department of Labor has newer files |
-| `site-refresh.yml` | daily (+ by hand) | asks Vercel to rebuild the site, so the `/h1b` pages carry fresh data and open jobs (needs `VERCEL_DEPLOY_HOOK`) |
+| `hiring-report.yml` | after the Monday job index runs (+ a Monday fallback, + by hand) | builds and publishes the week's hiring report and its posts, then asks Vercel to rebuild the site (needs no secrets of its own; the rebuild needs `VERCEL_DEPLOY_HOOK`) |
+| `site-refresh.yml` | daily (+ by hand) | asks Vercel to rebuild the site, so the `/h1b` pages carry fresh data and open jobs and `/hiring-report` the newest week (needs `VERCEL_DEPLOY_HOOK`) |
 | `release.yml` | a `v*` tag (+ by hand as a dry run) | macOS (signed, notarized), Windows, Linux builds → R2 `releases/<tag>/` |
 | `publish-release.yml` | called by `release.yml` (+ by hand) | copies a release to the bucket root: installers first, update feeds last |
 

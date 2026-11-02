@@ -1,0 +1,104 @@
+name: Hiring report
+
+# Every Monday: counts the jobs the job index first saw in the week that just ended (Monday to Sunday, UTC) and
+# publishes the weekly hiring report next to the index (https://index.weavenly.app/v1/report/index.json and
+# report/weekly-<year>-W<week>.json); the run's summary carries the week's LinkedIn and Threads posts.
+#
+# When: after each run of the Job index workflow that ends on a Monday (UTC), whether it succeeded or not. The week's
+# jobs were all first seen by Sunday's runs, so the report only needs the published index, and a failed Monday run
+# leaves Sunday's in place. The first such run (after the weekly one, about 01:00 UTC) publishes the week; the later
+# ones find it there and stop before installing anything. The Monday 12:41 UTC schedule is the fallback for a Monday
+# the job index doesn't run at all.
+#
+# It uses the job index's bucket and key (no secrets of its own). After publishing a week it asks Vercel for a site
+# build when VERCEL_DEPLOY_HOOK is set, so /hiring-report/<year>-w<week>, the page the posts link to, is live within
+# minutes; site-refresh.yml rebuilds the site daily anyway.
+
+on:
+  workflow_run:
+    workflows: ['Job index']
+    types: [completed]
+  schedule:
+    - cron: '41 12 * * 1'
+  workflow_dispatch:
+    inputs:
+      week:
+        description: 'ISO week to build, like 2026-W44 (empty: the last one that has ended)'
+        type: string
+        default: ''
+      force:
+        description: 'Build and publish the week again even if it is already published'
+        type: boolean
+        default: false
+
+concurrency:
+  group: hiring-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Is there a week to publish?
+        id: due
+        env:
+          EVENT: ${{ github.event_name }}
+          WEEK: ${{ inputs.week }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          if [ "$EVENT" != workflow_dispatch ] && [ "$(date -u +%u)" != 1 ]; then
+            echo "not a Monday (UTC); nothing to do"; echo "go=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # the last week that has ended: the ISO week of the last Sunday before today
+          week="${WEEK:-$(date -u -d 'last sunday' +%G-W%V)}"
+          week="${week^^}"
+          if [ "$FORCE" != true ] && curl -fsS -o /dev/null "https://index.weavenly.app/v1/report/weekly-$week.json"; then
+            echo "$week is already published; nothing to do"; echo "go=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "week=$week" >> "$GITHUB_OUTPUT"
+          echo "go=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.due.outputs.go == 'true'
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+
+      - uses: actions/setup-node@v4
+        if: steps.due.outputs.go == 'true'
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (workspace root)
+        if: steps.due.outputs.go == 'true'
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: npm ci
+
+      - name: Build and publish
+        if: steps.due.outputs.go == 'true'
+        env:
+          # the job index's bucket and key: the report is served from the same address
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.INDEX_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.INDEX_R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.INDEX_R2_BUCKET }}
+          INDEX_URL: https://index.weavenly.app/v1
+          # the whole index is read, one family file at a time (about 2 GB at its peak in November 2026)
+          NODE_OPTIONS: --max-old-space-size=4096
+          WEEK: ${{ steps.due.outputs.week }}
+          FORCE: ${{ inputs.force == true && '--force' || '' }}
+        run: npm --workspace backend run report:build -- --publish --week "$WEEK" $FORCE
+
+      - name: Ask Vercel to build the site
+        if: steps.due.outputs.go == 'true'
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "VERCEL_DEPLOY_HOOK is not set; the site shows the week after its next build"; exit 0; fi
+          curl -fsS -X POST "$HOOK" > /dev/null
+          echo "build requested"

@@ -14,8 +14,8 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   its résumé, its color and its job search. Switch with a two-finger swipe on the sidebar or Ctrl+1…9; the
   extension's open panel follows.
 - **Find** — every few hours the app downloads a public index of open jobs (Greenhouse, Lever, Ashby,
-  Workable, SmartRecruiters, Recruitee, Personio, Teamtailor, Breezy, Pinpoint, BambooHR, Rippling and
-  Workday boards, built by `backend/`) and reads five remote job boards, then matches them to each role
+  Workable, SmartRecruiters, Recruitee, Personio, Teamtailor, Breezy, Pinpoint, BambooHR, Rippling, Workday,
+  iCIMS, Taleo, SuccessFactors, Jobvite, Oracle Cloud and Eightfold boards, built by `backend/`) and reads five remote job boards, then matches them to each role
   **on your computer**. The best show up under **Found** on the Jobs page; AI rates up to 10 new ones per
   role per day (a setting; 0 turns it off). Under each US job a line says what the employer filed for
   **H-1B** and green cards: filings for this kind of role in the job's state, the usual wage level and the
@@ -32,7 +32,7 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   criminal record, right to work and visas, race and gender), which it asks you. Every fill is kept in the
   job's history. **You always click Submit.**
 - **Track** — jobs move through Saved → Applied → Interview → Offer → Closed. Mail is read over IMAP with an
-  app password (Gmail, Yandex, Mail.ru, iCloud, Yahoo or any server) and sorted **mostly by heuristics**
+  app password (Gmail, Yandex, Mail.ru, iCloud, Yahoo, each set up step by step with pictures, or any server) and sorted **mostly by heuristics**
   (sender domain, ATS patterns, keywords), with the LLM only on the uncertain cases. The inbox has tabs for
   interviews, replies, results, recruiters, mail not linked to a job yet, and **suspicious** mail (fake
   recruiters are kept apart and never change a job). A rejection for a job you applied to, even from a hiring
@@ -44,6 +44,9 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   address is whoever at the company wrote about the job, or one the posting lists (never a guessed one). Also
   interview transcripts and a **daily goal** (10 applications by default, a streak that survives weekends, one
   evening reminder).
+- **Your AI assistant** — off until you turn it on in Settings: then Claude Desktop or Claude Code on your
+  computer can read your job search (jobs, résumés, found jobs, follow-ups, the daily goal) through a local,
+  read-only server. It never gets your passwords, keys, About you, form answers or the text of your emails.
 
 The app speaks English and Russian.
 
@@ -55,8 +58,8 @@ Five repos: the root `weavenly` and four submodules.
 |-----|------------|-------|
 | **`app/`** | The product — desktop app for macOS, Windows and Linux; also runs the local server the extension talks to. | Electron + React + Vite + TS |
 | **`extension/`** | Browser extension that fills application forms from your résumé, published in the Chrome Web Store. | MV3 + esbuild + TS |
-| **`frontend/`** | The site, weavenly.app, in English and Russian, with English H-1B sponsor pages built from the published data and a dated, sourced H-1B rules page. | Astro, plain CSS |
-| **`backend/`** | The public job index builder (runs every 8 hours in GitHub Actions, publishes static files), the H-1B data builder (monthly) and a magic-link sign-in API the app doesn't use. | TS, Cloudflare R2; Fastify + Postgres |
+| **`frontend/`** | The site, weavenly.app, in English and Russian, with English H-1B sponsor pages built from the published data, a dated, sourced H-1B rules page and the weekly hiring report. | Astro, plain CSS |
+| **`backend/`** | The public job index builder (runs every 8 hours in GitHub Actions, publishes static files), the H-1B data builder (monthly), the weekly hiring report and a magic-link sign-in API the app doesn't use. | TS, Cloudflare R2; Fastify + Postgres |
 
 The desktop app and the extension talk over a **local** server (`127.0.0.1:9217`) — nothing routes through
 a cloud. The job index is the same files for everyone; what a person searches for never leaves their
@@ -87,6 +90,8 @@ it). The site's tokens are in [`../frontend/README.md`](../frontend/README.md), 
 - **Job index** — built and published every 8 hours to `index.weavenly.app`.
 - **H-1B data** — checked monthly, published to `index.weavenly.app/v1/visa/` when the Department of Labor
   has newer files.
+- **Hiring report** — every Monday, the jobs the index first saw in the week before, published to
+  `index.weavenly.app/v1/report/` with ready LinkedIn and Threads posts, and shown at `weavenly.app/hiring-report`.
 - **Sign-in API** — exists in `backend/`; nothing in the app needs an account.
 
 Work happens on feature branches merged into `main`; designs and plans are dated documents in

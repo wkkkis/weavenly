@@ -2,7 +2,7 @@ name: Job index format
 
 # The builder (backend) and the app read the same index format. Their two copies of the format module and
 # of the sample fixture must stay identical, and so must the three copies of the H-1B data's format
-# (backend, app, site).
+# (backend, app, site) and the two of the weekly hiring report's format (backend, site).
 
 on:
   push:
@@ -25,3 +25,4 @@ jobs:
           cmp backend/src/job-index/__tests__/fixtures/job-index-sample.v1.json app/src/discovery/__tests__/fixtures/job-index-sample.v1.json
           cmp backend/src/visa/format.ts app/src/discovery/visa-format.ts
           cmp backend/src/visa/format.ts frontend/src/lib/visa-format.ts
+          cmp backend/src/report/format.ts frontend/src/lib/report-format.ts
