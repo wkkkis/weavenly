@@ -26,8 +26,10 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   shows a before/after **diff**. A **résumé library** keeps several versions and picks the best fit per job
   (you can override). No AI? A deterministic reorder/emphasis fallback still runs. Renders to PDF and DOCX.
 - **Fill** — the browser extension fills application forms on any site (24 site adapters plus a generic
-  engine). On a job's page without a form it offers only to create a résumé for that job; on a form for a
-  different job it asks which résumé to attach (the original or the best ready one). The AI answers the
+  engine), field by field where you can see it: the page glides to each field, which glows with a check. On a
+  job's page without a form it offers only to create a résumé for that job, shows the match and marks in the
+  job's text the terms your résumé has and lacks; on a sign-in step before an application it only asks you to
+  sign in; on a form for a different job it asks which résumé to attach (the original or the best ready one). The AI answers the
   form's questions from your résumé, except a short legal list (consents, date of birth and ID numbers,
   criminal record, right to work and visas, race and gender), which it asks you. Every fill is kept in the
   job's history. **You always click Submit.**
