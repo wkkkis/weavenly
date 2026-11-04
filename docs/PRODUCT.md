@@ -29,7 +29,8 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   engine), field by field where you can see it: the page glides to each field, which glows with a check. On a
   job's page without a form it offers only to create a résumé for that job, shows the match and marks in the
   job's text the terms your résumé has and lacks; on a sign-in step before an application it only asks you to
-  sign in; on a form for a different job it asks which résumé to attach (the original or the best ready one). The AI answers the
+  sign in; in a Workday application, once you fill the first step, each step you reach with Save and Continue
+  fills itself; on a form for a different job it asks which résumé to attach (the original or the best ready one). The AI answers the
   form's questions from your résumé, except a short legal list (consents, date of birth and ID numbers,
   criminal record, right to work and visas, race and gender), which it asks you. Every fill is kept in the
   job's history. **You always click Submit.**
