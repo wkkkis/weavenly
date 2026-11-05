@@ -22,7 +22,9 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   median wage offered, from the U.S. Department of Labor's quarterly files (hidden if you don't need
   sponsorship). The extension's panel shows the same line on a US job's page.
 - **Tailor** — an LLM rewrites your summary, bullets and skills to match the job **truthfully** (a job's
-  keyword is woven in only when your résumé already grounds it; anything it can't ground is flagged) and
+  keyword is woven in only when your résumé already grounds it, as written or through what it names: Scrum
+  shows Agile, Git version control; the missing ones are listed, and the ones you tick as yours go into your
+  résumé and it is tailored again) and
   shows a before/after **diff**. A **résumé library** keeps several versions and picks the best fit per job
   (you can override). No AI? A deterministic reorder/emphasis fallback still runs. Renders to PDF and DOCX.
 - **Fill** — the browser extension fills application forms on any site (24 site adapters plus a generic
