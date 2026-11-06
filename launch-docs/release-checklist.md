@@ -11,22 +11,25 @@ Already set up:
 ## How downloads work
 
 - **Build and upload.** `release.yml` builds macOS (signed and notarized; Apple silicon and Intel as two
-  builds, not one universal app), Windows (NSIS, unsigned) and Linux (AppImage, unsigned). Each build uploads
-  its files to **Cloudflare R2** under `releases/<tag>/`.
+  builds, not one universal app), Windows (NSIS, unsigned) and Linux (AppImage, unsigned). The Windows and
+  Linux builds sign their update feeds with Weavenly's own key (`latest.yml.sig`, `latest-linux.yml.sig`; §2a).
+  Each build uploads its files to **Cloudflare R2** under `releases/<tag>/`.
 - **Publish.** Once all three builds succeed, `publish-release.yml` copies them to the bucket's root:
   - `Weavenly-arm64.dmg`, `Weavenly-arm64.zip`, `Weavenly-x64.dmg`, `Weavenly-x64.zip`, and
     `Weavenly.dmg` (a copy of the Apple silicon one, for links made before the split);
   - `Weavenly-Setup.exe`;
   - `Weavenly.AppImage`;
+  - the signatures `latest.yml.sig` and `latest-linux.yml.sig` (both or neither);
   - the update feeds `latest-mac.yml`, `latest.yml` and `latest-linux.yml`.
 
-  Installers are uploaded first and the feeds last, so an updater never reads a feed that points at a
-  missing file. Publishing can be re-run by hand (Actions → Publish release → tag) for a tag whose files
+  Installers are uploaded first, then the signatures, and the feeds last, so an updater never reads a feed
+  that points at a missing file. Publishing can be re-run by hand (Actions → Publish release → tag) for a tag whose files
   are already in `releases/<tag>/`.
 - **The site** links to `https://weavenly.app/download/<file>`. `frontend/vercel.json` redirects that
   to `https://downloads.weavenly.app/<file>`.
 - **The app's updater** reads `https://weavenly.app/download/latest*.yml` (`app/package.json` →
-  `build.publish`, generic provider) and follows the same redirect.
+  `build.publish`, generic provider) and follows the same redirect. On Windows and Linux, once the app
+  carries the update key, it downloads an update only when `latest*.yml.sig` confirms the feed's files.
 
 ## 1. Cloudflare R2 (one time, done)
 
@@ -57,8 +60,25 @@ under `v1/visa/`, and the weekly hiring report (`.github/workflows/hiring-report
 | `APPLE_TEAM_ID` | release (macOS) | Team ID (developer.apple.com → Membership); electron-builder reads it to notarize |
 | `CSC_LINK` | release (macOS) | base64 of the Developer ID Application `.p12` |
 | `CSC_KEY_PASSWORD` | release (macOS) | the `.p12` password |
+| `UPDATE_SIGNING_KEY` | release (Windows, Linux) | the update signing key's private half (PEM), §2a. Needed once `app/src/main/update-key.ts` carries the public half: a tag then stops at "Check the update signing key" without it or with another key |
 
 Paste secrets without a trailing newline.
+
+## 2a. Update signing key (one time)
+
+Windows and Linux installers carry no code signature, so their updates are signed with Weavenly's own
+Ed25519 key instead. Make it once, on your own computer, in `app/`:
+
+```bash
+npx tsx scripts/update-signing-key.ts
+gh secret set UPDATE_SIGNING_KEY --repo wkkkis/weavenly < ~/weavenly-update-signing-key.pem
+```
+
+The script writes the public half into `app/src/main/update-key.ts` (commit it, then bump the root's `app`
+pointer) and the private half into `~/weavenly-update-signing-key.pem`, readable only by you. Back that file
+up (a password manager), then delete it: every app that carries the public key refuses an update signed by
+any other key. The private key never goes into a repo or a chat. Until `update-key.ts` carries a key, the
+app checks nothing and a missing secret only skips the signing.
 
 ## 3. Releasing the desktop app
 
@@ -71,7 +91,8 @@ Paste secrets without a trailing newline.
    copies them to the bucket's root. After adding a missing secret, re-run the failed run (Actions → the run
    → Re-run failed jobs): the tag stays.
 5. **Check.** `https://weavenly.app/download/Weavenly-arm64.dmg` (and `Weavenly-x64.dmg`, `.exe`,
-   `.AppImage`) downloads, and `…/download/latest-mac.yml` shows the new version.
+   `.AppImage`) downloads, and `…/download/latest-mac.yml` (and, once signed, `latest.yml.sig`) shows the new
+   version.
 
 A manual run (Actions → Release Desktop App → Run workflow, not on a tag) builds all three and keeps
 them as workflow artifacts. It uploads nothing, so you can use it as a dry run.

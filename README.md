@@ -130,8 +130,8 @@ See [`backend/README.md`](./backend/README.md) and [`ARCHITECTURE-BACKEND.md`](.
 | `visa-data.yml` | the 3rd of each month (+ by hand) | builds and publishes the H-1B and green card data when the Department of Labor has newer files |
 | `hiring-report.yml` | after the Monday job index runs (+ a Monday fallback, + by hand) | builds and publishes the week's hiring report and its posts, then asks Vercel to rebuild the site (needs no secrets of its own; the rebuild needs `VERCEL_DEPLOY_HOOK`) |
 | `site-refresh.yml` | daily (+ by hand) | asks Vercel to rebuild the site, so the `/h1b` pages carry fresh data and open jobs and `/hiring-report` the newest week (needs `VERCEL_DEPLOY_HOOK`) |
-| `release.yml` | a `v*` tag (+ by hand as a dry run) | macOS (signed, notarized), Windows, Linux builds → R2 `releases/<tag>/` |
-| `publish-release.yml` | called by `release.yml` (+ by hand) | copies a release to the bucket root: installers first, update feeds last |
+| `release.yml` | a `v*` tag (+ by hand as a dry run) | macOS (signed, notarized), Windows, Linux builds (their update feeds signed with Weavenly's key) → R2 `releases/<tag>/` |
+| `publish-release.yml` | called by `release.yml` (+ by hand) | copies a release to the bucket root: installers first, then the feeds' signatures, update feeds last |
 
 `.github/dependabot.yml` keeps the root lockfile, the actions and the submodule pointers current.
 

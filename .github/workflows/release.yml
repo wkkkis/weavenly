@@ -7,6 +7,9 @@ name: Release Desktop App
 # releases/<tag>/; only when all three succeeded does the publish job copy them to the bucket's root
 # under the names the site and the in-app updater read: Weavenly-arm64 / -x64 .dmg and .zip, Weavenly-Setup.exe,
 # Weavenly.AppImage and latest*.yml (installers first, update feeds last) — never half a release.
+# Windows and Linux updates carry no code signature, so their feeds are signed with Weavenly's own key
+# (app/scripts/sign-update-feed.ts → latest.yml.sig, latest-linux.yml.sig); an app that carries the public key
+# (app/src/main/update-key.ts) downloads only an update those confirm.
 # The site serves them at https://weavenly.app/download/<file> (frontend/vercel.json redirects to R2).
 # A tag first checks that every secret it needs is set, and stops naming the missing ones.
 # A manual run (workflow_dispatch) without a tag only builds and keeps the files as artifacts.
@@ -23,6 +26,8 @@ name: Release Desktop App
 #   R2_ACCESS_KEY_ID               (R2 API token: Object Read & Write on the bucket)
 #   R2_SECRET_ACCESS_KEY           (its secret)
 #   R2_BUCKET                      (bucket name)
+#   UPDATE_SIGNING_KEY             (Ed25519 private key, PEM, from app/scripts/update-signing-key.ts; needed once the
+#                                   app carries the public key: a tag then stops without it or with another key)
 
 on:
   push:
@@ -103,6 +108,15 @@ jobs:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
         run: npm ci
 
+      # Windows and Linux: the update signing key is set and is the one the app checks (a tag stops here, not after
+      # the build, when it isn't).
+      - name: Check the update signing key
+        if: matrix.os != 'macos-15'
+        working-directory: app
+        env:
+          UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+        run: npx tsx scripts/sign-update-feed.ts --check
+
       - name: Build renderer + main
         run: npm --workspace app run build
 
@@ -142,6 +156,14 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npx electron-builder --linux --x64 --publish never
 
+      # latest.yml / latest-linux.yml → latest*.yml.sig, each file's version, name and sha512 signed
+      - name: Sign the update feed (Windows, Linux)
+        if: matrix.os != 'macos-15'
+        working-directory: app
+        env:
+          UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+        run: npx tsx scripts/sign-update-feed.ts release
+
       # This OS's installers + update feed → R2 releases/<tag>/ (not yet visible to anyone).
       - name: Upload to R2 (releases/<tag>/)
         if: env.IS_TAG == 'true'
@@ -154,7 +176,7 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           aws s3 cp app/release/ "s3://$R2_BUCKET/releases/$TAG/" --recursive \
-            --exclude '*' --include 'Weavenly*' --include 'latest*.yml' \
+            --exclude '*' --include 'Weavenly*' --include 'latest*.yml' --include 'latest*.yml.sig' \
             --endpoint-url "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
 
       - name: Keep the files as artifacts (a failed build, or a manual run without a tag)
@@ -165,6 +187,7 @@ jobs:
           path: |
             app/release/Weavenly*
             app/release/latest*.yml
+            app/release/latest*.yml.sig
           retention-days: 7
 
   # All three builds succeeded: copy them to the bucket's root (publish-release.yml).
