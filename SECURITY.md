@@ -66,6 +66,13 @@ Worth knowing before you file:
   app password. On a system with no keychain backend the app falls back to
   plaintext — this is documented, not a finding on its own. On macOS and Linux
   the app makes its data folder readable by its owner only (0700) at start.
+- **Updates.** macOS updates are code-signed and notarized, and Squirrel checks
+  that. Windows and Linux installers carry no code signature: once the app
+  carries Weavenly's update key (`app/src/main/update-key.ts`), it downloads an
+  update only when the feed's signatures (`latest*.yml.sig`, Ed25519 over each
+  file's version, name and sha512) confirm it, and the download is then checked
+  against that sha512 (`app/src/main/update-signature.ts`). Until then an update
+  is trusted as served over HTTPS from weavenly.app.
 - **AI calls go straight to the provider you configured** (your key, your
   ChatGPT or Claude plan, or local Ollama). Weavenly runs no proxy and the app
   sends no telemetry. A path that sends user data anywhere else is a bug and we
