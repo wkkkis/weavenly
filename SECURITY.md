@@ -54,16 +54,18 @@ Out of scope:
 
 Worth knowing before you file:
 
-- **The loopback server answers any origin.** `Access-Control-Allow-Origin: *`
-  is deliberate: the extension's content scripts call the server from whatever
-  ATS page they run on, so the origin can't be allow-listed. Every endpoint
-  except `/status` and `/pair` requires a bearer token that only the paired
-  extension holds, and `/pair` is rate-limited. A report needs to show actual
-  data access, not just that the port answers.
+- **The loopback server answers only the extension.** The extension calls it
+  from its service worker only. A request carrying a web page's `Origin`, or
+  another `Host` (DNS rebinding), gets `403` before any route runs, and no site
+  gets CORS headers to read an answer (`app/src/companion/gate.ts`). Every
+  endpoint except `/status` and `/pair` also requires a bearer token that only
+  the paired extension holds, and `/pair` is rate-limited. A report needs to
+  show actual data access, not just that the port answers.
 - **Secrets are encrypted at rest via the OS keychain** (`safeStorage`, through
   `app/src/main/secret-store.ts`): the AI key, the ChatGPT sign-in and the mail
   app password. On a system with no keychain backend the app falls back to
-  plaintext — this is documented, not a finding on its own.
+  plaintext — this is documented, not a finding on its own. On macOS and Linux
+  the app makes its data folder readable by its owner only (0700) at start.
 - **AI calls go straight to the provider you configured** (your key, your
   ChatGPT or Claude plan, or local Ollama). Weavenly runs no proxy and the app
   sends no telemetry. A path that sends user data anywhere else is a bug and we
