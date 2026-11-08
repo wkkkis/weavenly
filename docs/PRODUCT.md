@@ -91,7 +91,7 @@ it). The site's tokens are in [`../frontend/README.md`](../frontend/README.md), 
 
 - **Desktop app** — v0.3.23, downloadable from weavenly.app (macOS 13+ on Apple silicon and Intel, signed
   and notarized; Windows and Linux unsigned), with in-app updates. See `launch-docs/release-checklist.md`.
-- **Extension** — 1.0.10 (`extension/manifest.json`), public in the Chrome Web Store since 2026-10-19.
+- **Extension** — 1.0.11 (`extension/manifest.json`), public in the Chrome Web Store since 2026-10-19.
 - **Job index** — built and published every 8 hours to `index.weavenly.app`.
 - **H-1B data** — checked monthly, published to `index.weavenly.app/v1/visa/` when the Department of Labor
   has newer files.
