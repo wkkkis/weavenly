@@ -45,7 +45,8 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
 - **Apply queue** — pick several jobs and press "Apply one by one": the app saves them, makes a résumé for
   each ahead of time and names the next one; the extension fills each queued job's form by itself and offers
   the next job once one is sent. You check every form and press Submit.
-- **Track** — jobs move through Saved → Applied → Interview → Offer → Closed. Mail is read over IMAP with an
+- **Track** — jobs move through Saved → Applied → Interview → Offer → Closed. An application sent while the app
+  is closed is kept by the extension and recorded, with the time it was sent, once the app is open again. Mail is read over IMAP with an
   app password (Gmail, Yandex, Mail.ru, iCloud, Yahoo, each set up step by step with pictures, or any server) and sorted **mostly by heuristics**
   (sender domain, ATS patterns, keywords), with the LLM only on the uncertain cases. The inbox has tabs for
   interviews, replies, results, recruiters, mail not linked to a job yet, and **suspicious** mail (fake
