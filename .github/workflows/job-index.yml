@@ -1,11 +1,13 @@
 name: Job index
 
-# Builds the public job index every 8 hours and publishes it to R2 (served at https://index.weavenly.app/v1/).
-# The Monday 00:15 UTC run is the weekly one: it also looks for new boards and checks cold and dead boards.
+# Builds the public job index every 4 hours and publishes it to R2 (served at https://index.weavenly.app/v1/).
+# The first run on a Monday (UTC) is the weekly one: it also looks for new boards and checks cold and dead boards.
+# A run takes about 28 minutes; GitHub often starts a scheduled run hours late, and the next one follows it
+# (one at a time, never cancelled).
 
 on:
   schedule:
-    - cron: '15 */8 * * *'
+    - cron: '15 */4 * * *'
   workflow_dispatch:
     inputs:
       weekly:
@@ -52,5 +54,6 @@ jobs:
           # of 2026-11-03 (29 147 boards read)
           NODE_OPTIONS: --max-old-space-size=6144
         # The first run on a Monday (UTC) is the weekly one: it also finds new boards and rechecks cold and
-        # dead ones (isWeeklyRun in the builder decides, so a late start still counts).
+        # dead ones (isWeeklyRun in the builder decides by the published index's date, so a late start still
+        # counts and the next Monday run is an ordinary one).
         run: npm --workspace backend run index:build -- --publish ${{ inputs.weekly == true && '--weekly' || '--auto-weekly' }}

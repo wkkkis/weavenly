@@ -69,6 +69,10 @@ running when its window is closed, so the extension can always reach it.
 - **Roles**: up to nine, each with its titles, résumé, color and job search.
 - **Jobs**: Saved → Applied → Interview → Offer → Closed, plus **Found** — jobs matched on your computer
   from the public job index and five remote boards.
+- **People you know**: your LinkedIn connections from the file LinkedIn lets you download, kept on your
+  computer; jobs show who you know at their company, and a message to them is drafted for you to copy.
+- **Apply queue**: several picked jobs, their résumés made ahead of time; the extension fills each form and
+  offers the next job. Nothing is submitted for you.
 - **Résumé tailoring**: a truthful AI rewrite with a before/after diff, a résumé library with best-fit
   pick, PDF and DOCX.
 - **Mail**: IMAP/SMTP with an app password, set up step by step for Gmail, iCloud, Yahoo, Yandex and Mail.ru;
@@ -104,7 +108,7 @@ the extension make), the recruiter check (`/recruiter-check`, scam signs in an e
 
 - **The public job index**: reads public ATS job lists (Greenhouse, Lever, Ashby, Workable,
   SmartRecruiters, Recruitee, Personio, Teamtailor, Breezy, Pinpoint, BambooHR, Rippling, Workday, iCIMS, Taleo,
-  SuccessFactors, Jobvite, Oracle Cloud, Eightfold) for ~43,000 company boards every 8 hours and publishes compact static files to `index.weavenly.app/v1/`. No
+  SuccessFactors, Jobvite, Oracle Cloud, Eightfold) for ~43,000 company boards every 4 hours and publishes compact static files to `index.weavenly.app/v1/`. No
   descriptions, no personal data, no API.
 - **H-1B and green card data**: once a month checks the U.S. Department of Labor's quarterly LCA and PERM
   disclosure files and, when there are new ones, publishes each employer's certified filings by occupation
@@ -126,7 +130,7 @@ See [`backend/README.md`](./backend/README.md) and [`ARCHITECTURE-BACKEND.md`](.
 | `frontend.yml` | … `frontend` | `astro check`, unit tests, build (Vercel deploys through its Git integration) |
 | `backend.yml` | … `backend` | type-check and unit tests |
 | `job-index-format.yml` | … `app`, `backend` or `frontend` | the copies of the job index format and its fixture, of the H-1B data format and of the hiring report format are identical |
-| `job-index.yml` | every 8 hours (+ by hand) | builds and publishes the job index; the Monday run also finds new boards |
+| `job-index.yml` | every 4 hours (+ by hand) | builds and publishes the job index; the first Monday run also finds new boards |
 | `visa-data.yml` | the 3rd of each month (+ by hand) | builds and publishes the H-1B and green card data when the Department of Labor has newer files |
 | `hiring-report.yml` | after the Monday job index runs (+ a Monday fallback, + by hand) | builds and publishes the week's hiring report and its posts, then asks Vercel to rebuild the site (needs no secrets of its own; the rebuild needs `VERCEL_DEPLOY_HOOK`) |
 | `site-refresh.yml` | daily (+ by hand) | asks Vercel to rebuild the site, so the `/h1b` pages carry fresh data and open jobs and `/hiring-report` the newest week (needs `VERCEL_DEPLOY_HOOK`) |
