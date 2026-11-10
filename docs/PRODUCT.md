@@ -13,7 +13,7 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
 - **Roles** — up to nine roles ("Frontend Engineer", "Product Designer", …), each with its target titles,
   its résumé, its color and its job search. Switch with a two-finger swipe on the sidebar or Ctrl+1…9; the
   extension's open panel follows.
-- **Find** — every few hours the app downloads a public index of open jobs (Greenhouse, Lever, Ashby,
+- **Find** — every 3 hours (a setting) the app downloads a public index of open jobs (Greenhouse, Lever, Ashby,
   Workable, SmartRecruiters, Recruitee, Personio, Teamtailor, Breezy, Pinpoint, BambooHR, Rippling, Workday,
   iCIMS, Taleo, SuccessFactors, Jobvite, Oracle Cloud and Eightfold boards, built by `backend/`) and reads five remote job boards, then matches them to each role
   **on your computer**. The best show up under **Found** on the Jobs page; AI rates up to 10 new ones per
@@ -21,6 +21,12 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   **H-1B** and green cards: filings for this kind of role in the job's state, the usual wage level and the
   median wage offered, from the U.S. Department of Labor's quarterly files (hidden if you don't need
   sponsorship). The extension's panel shows the same line on a US job's page.
+  Found has two filters: jobs posted in the last 2 days, and US jobs only from employers that filed for H-1B or
+  a green card.
+- **People you know** — give the app the file of your connections that LinkedIn lets you download, and jobs
+  show who you know at their company, in Jobs and in the extension's panel. "Draft a message" writes a short
+  note about the team and a referral for you to copy. The list stays on your computer; the app never signs in
+  to LinkedIn and never sends a message.
 - **Tailor** — an LLM rewrites your summary, bullets and skills to match the job **truthfully** (a job's
   keyword is woven in only when your résumé already grounds it, as written or through what it names: Scrum
   shows Agile, Git version control; the missing ones are listed, and the ones you tick as yours go into your
@@ -36,6 +42,9 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   form's questions from your résumé, except a short legal list (consents, date of birth and ID numbers,
   criminal record, right to work and visas, race and gender), which it asks you. Every fill is kept in the
   job's history. **You always click Submit.**
+- **Apply queue** — pick several jobs and press "Apply one by one": the app saves them, makes a résumé for
+  each ahead of time and names the next one; the extension fills each queued job's form by itself and offers
+  the next job once one is sent. You check every form and press Submit.
 - **Track** — jobs move through Saved → Applied → Interview → Offer → Closed. Mail is read over IMAP with an
   app password (Gmail, Yandex, Mail.ru, iCloud, Yahoo, each set up step by step with pictures, or any server) and sorted **mostly by heuristics**
   (sender domain, ATS patterns, keywords), with the LLM only on the uncertain cases. The inbox has tabs for
@@ -64,7 +73,7 @@ Five repos: the root `weavenly` and four submodules.
 | **`app/`** | The product — desktop app for macOS, Windows and Linux; also runs the local server the extension talks to. | Electron + React + Vite + TS |
 | **`extension/`** | Browser extension that fills application forms from your résumé, published in the Chrome Web Store. | MV3 + esbuild + TS |
 | **`frontend/`** | The site, weavenly.app, in English and Russian, with English H-1B sponsor pages built from the published data, a dated, sourced H-1B rules page and the weekly hiring report. | Astro, plain CSS |
-| **`backend/`** | The public job index builder (runs every 8 hours in GitHub Actions, publishes static files), the H-1B data builder (monthly), the weekly hiring report and a magic-link sign-in API the app doesn't use. | TS, Cloudflare R2; Fastify + Postgres |
+| **`backend/`** | The public job index builder (runs every 4 hours in GitHub Actions, publishes static files), the H-1B data builder (monthly), the weekly hiring report and a magic-link sign-in API the app doesn't use. | TS, Cloudflare R2; Fastify + Postgres |
 
 The desktop app and the extension talk over a **local** server (`127.0.0.1:9217`) — nothing routes through
 a cloud. The job index is the same files for everyone; what a person searches for never leaves their
@@ -89,10 +98,10 @@ it). The site's tokens are in [`../frontend/README.md`](../frontend/README.md), 
 
 ## Status
 
-- **Desktop app** — v0.3.24, downloadable from weavenly.app (macOS 13+ on Apple silicon and Intel, signed
+- **Desktop app** — v0.3.25, downloadable from weavenly.app (macOS 13+ on Apple silicon and Intel, signed
   and notarized; Windows and Linux unsigned), with in-app updates. See `launch-docs/release-checklist.md`.
-- **Extension** — 1.0.11 (`extension/manifest.json`), public in the Chrome Web Store since 2026-10-19.
-- **Job index** — built and published every 8 hours to `index.weavenly.app`.
+- **Extension** — 1.0.12 (`extension/manifest.json`), public in the Chrome Web Store since 2026-10-19.
+- **Job index** — built and published every 4 hours to `index.weavenly.app`.
 - **H-1B data** — checked monthly, published to `index.weavenly.app/v1/visa/` when the Department of Labor
   has newer files.
 - **Hiring report** — every Monday, the jobs the index first saw in the week before, published to
