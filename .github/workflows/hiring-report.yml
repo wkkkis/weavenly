@@ -59,7 +59,7 @@ jobs:
           echo "week=$week" >> "$GITHUB_OUTPUT"
           echo "go=true" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.due.outputs.go == 'true'
         with:
           submodules: recursive
