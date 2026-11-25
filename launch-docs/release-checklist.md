@@ -5,7 +5,8 @@ the tags `v0.3.5` … `v0.3.23` went out through it (0.3.24 was never tagged; `v
 
 Already set up:
 - `weavenly.app` DNS is at Cloudflare;
-- the R2 bucket `weavenly-downloads`, public at `https://downloads.weavenly.app`, is in `frontend/vercel.json`;
+- the R2 bucket `weavenly-downloads`, public at `https://downloads.weavenly.app`, is in `frontend/middleware.ts`
+  (`DOWNLOADS_ORIGIN` in `frontend/src/lib/download-count.ts`);
 - the site's download buttons are on (`RELEASES_LIVE = true` in `frontend/src/components/home/Download.astro`).
 
 ## How downloads work
@@ -25,8 +26,9 @@ Already set up:
   Installers are uploaded first, then the signatures, and the feeds last, so an updater never reads a feed
   that points at a missing file. Publishing can be re-run by hand (Actions → Publish release → tag) for a tag whose files
   are already in `releases/<tag>/`.
-- **The site** links to `https://weavenly.app/download/<file>`. `frontend/vercel.json` redirects that
-  to `https://downloads.weavenly.app/<file>`.
+- **The site** links to `https://weavenly.app/download/<file>`. `frontend/middleware.ts` (Vercel Routing
+  Middleware) redirects that to `https://downloads.weavenly.app/<file>` and counts each installer download as
+  one anonymous PostHog event (`download`).
 - **The app's updater** reads `https://weavenly.app/download/latest*.yml` (`app/package.json` →
   `build.publish`, generic provider) and follows the same redirect. On Windows and Linux, once the app
   carries the update key, it downloads an update only when `latest*.yml.sig` confirms the feed's files.
@@ -38,8 +40,9 @@ Already set up:
    Cloudflare).
 3. **API token.** R2 → Manage API tokens → create one with Object Read & Write on that bucket. Keep the
    Access Key ID and the Secret Access Key.
-4. **The site.** `frontend/vercel.json` points `/download/:file` at the bucket's public URL. With
-   `RELEASES_LIVE` on, the site build fails if that URL (or the Chrome Web Store link) is missing.
+4. **The site.** `frontend/middleware.ts` sends `/download/<file>` to the bucket's public URL
+   (`DOWNLOADS_ORIGIN` in `frontend/src/lib/download-count.ts`). With `RELEASES_LIVE` on, the site build fails
+   if that URL (or the Chrome Web Store link in `frontend/vercel.json`) is missing.
 
 The public job index has its **own** bucket and key (served at `https://index.weavenly.app/v1/`); see
 `.github/workflows/job-index.yml`. The H-1B data (`.github/workflows/visa-data.yml`) goes to the same bucket

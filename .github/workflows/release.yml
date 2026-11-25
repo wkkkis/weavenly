@@ -10,7 +10,7 @@ name: Release Desktop App
 # Windows and Linux updates carry no code signature, so their feeds are signed with Weavenly's own key
 # (app/scripts/sign-update-feed.ts → latest.yml.sig, latest-linux.yml.sig); an app that carries the public key
 # (app/src/main/update-key.ts) downloads only an update those confirm.
-# The site serves them at https://weavenly.app/download/<file> (frontend/vercel.json redirects to R2).
+# The site serves them at https://weavenly.app/download/<file> (frontend/middleware.ts redirects to R2).
 # A tag first checks that every secret it needs is set, and stops naming the missing ones.
 # A manual run (workflow_dispatch) without a tag only builds and keeps the files as artifacts.
 #
