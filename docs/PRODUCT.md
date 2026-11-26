@@ -20,7 +20,8 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   role per day (a setting; 0 turns it off). Under each US job a line says what the employer filed for
   **H-1B** and green cards: filings for this kind of role in the job's state, the usual wage level and the
   median wage offered, from the U.S. Department of Labor's quarterly files (hidden if you don't need
-  sponsorship). The extension's panel shows the same line on a US job's page.
+  sponsorship). It shows in Found, under saved jobs (list, board, the job's page) and Home's jobs; a
+  company's panel shows its filings for every role. The extension's panel shows the same line on a US job's page.
   Found has two filters: jobs posted in the last 2 days, and US jobs only from employers that filed for H-1B or
   a green card.
 - **People you know** — give the app the file of your connections that LinkedIn lets you download, and jobs
