@@ -96,7 +96,7 @@ added, it stays optional and the local app remains free. That restraint *is* the
 The app's look: white cards on a soft cool gray, ink text, a deep indigo accent, and each role's color
 (lavender, coral, peach, sand, sage, sky, periwinkle, slate, sunset) carrying the window frame and the
 bands, under a faint film grain; Nunito for display text, the system font for the rest. The site borrows
-it on warm paper, with the role colors on loud "stage" colors. The mark is the app's icon, never a letter. Voice: direct, honest, plain — "your ChatGPT or Claude plan", "your email".
+it on warm paper, with the role colors on loud "stage" colors. The mark is the app's icon, never a letter: the hand-drawn "w" on the Lavender role's colors with the app's grain. Voice: direct, honest, plain — "your ChatGPT or Claude plan", "your email".
 The site and the extension don't say "open source", "BYOK", "Companion" or "GitHub" (their tests enforce
 it). The site's tokens are in [`../frontend/README.md`](../frontend/README.md), the extension panel's in
 `extension/DESIGN.md`.
