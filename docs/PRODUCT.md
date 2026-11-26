@@ -24,7 +24,9 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   company's panel shows its filings for every role. The extension's panel shows the same line on a US job's page.
   Found has two filters: jobs posted in the last 2 days, and US jobs only from employers that filed for H-1B or
   a green card. The site's job pages (`weavenly.app/jobs`, `/companies`) list the index's open US jobs by area,
-  state and company; their "Open in Weavenly" (`weavenly://job`) saves the job in the app and opens it.
+  state and company, each list beside a panel with the job's details and its full description, read in the
+  visitor's browser from the company's job board (`?job=<key>`, never indexed); "Open in Weavenly"
+  (`weavenly://job`) saves the job in the app and opens it, and with the extension each job shows the person's fit.
 - **People you know** — give the app the file of your connections that LinkedIn lets you download, and jobs
   show who you know at their company, in Jobs and in the extension's panel. "Draft a message" writes a short
   note about the team and a referral for you to copy. The list stays on your computer; the app never signs in
@@ -103,7 +105,7 @@ it). The site's tokens are in [`../frontend/README.md`](../frontend/README.md), 
 
 - **Desktop app** — v0.3.26, downloadable from weavenly.app (macOS 13+ on Apple silicon and Intel, signed
   and notarized; Windows and Linux unsigned), with in-app updates. See `launch-docs/release-checklist.md`.
-- **Extension** — 1.0.14 (`extension/manifest.json`), public in the Chrome Web Store since 2026-10-19.
+- **Extension** — 1.0.15 (`extension/manifest.json`), public in the Chrome Web Store since 2026-10-19.
 - **Job index** — built and published every 4 hours to `index.weavenly.app`.
 - **H-1B data** — checked monthly, published to `index.weavenly.app/v1/visa/` when the Department of Labor
   has newer files.
