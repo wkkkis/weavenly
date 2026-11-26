@@ -23,7 +23,8 @@ calls, never pay a margin on tokens and never see your data. It's **free**, lice
   sponsorship). It shows in Found, under saved jobs (list, board, the job's page) and Home's jobs; a
   company's panel shows its filings for every role. The extension's panel shows the same line on a US job's page.
   Found has two filters: jobs posted in the last 2 days, and US jobs only from employers that filed for H-1B or
-  a green card.
+  a green card. The site's job pages (`weavenly.app/jobs`, `/companies`) list the index's open US jobs by area,
+  state and company; their "Open in Weavenly" (`weavenly://job`) saves the job in the app and opens it.
 - **People you know** — give the app the file of your connections that LinkedIn lets you download, and jobs
   show who you know at their company, in Jobs and in the extension's panel. "Draft a message" writes a short
   note about the team and a referral for you to copy. The list stays on your computer; the app never signs in
@@ -74,7 +75,7 @@ Five repos: the root `weavenly` and four submodules.
 |-----|------------|-------|
 | **`app/`** | The product — desktop app for macOS, Windows and Linux; also runs the local server the extension talks to. | Electron + React + Vite + TS |
 | **`extension/`** | Browser extension that fills application forms from your résumé, published in the Chrome Web Store. | MV3 + esbuild + TS |
-| **`frontend/`** | The site, weavenly.app, in English and Russian, with English H-1B sponsor pages built from the published data, a dated, sourced H-1B rules page and the weekly hiring report. | Astro, plain CSS |
+| **`frontend/`** | The site, weavenly.app, in English and Russian, with English H-1B sponsor pages built from the published data, English job pages by area, state and company built from the job index, a dated, sourced H-1B rules page and the weekly hiring report. | Astro, plain CSS |
 | **`backend/`** | The public job index builder (runs every 4 hours in GitHub Actions, publishes static files), the H-1B data builder (monthly), the weekly hiring report and a magic-link sign-in API the app doesn't use. | TS, Cloudflare R2; Fastify + Postgres |
 
 The desktop app and the extension talk over a **local** server (`127.0.0.1:9217`) — nothing routes through
