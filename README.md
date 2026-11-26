@@ -98,8 +98,8 @@ in the job's history; the person clicks Submit. See [`extension/README.md`](./ex
 ### `frontend/` — the site
 
 Astro, plain CSS, English and Russian, deployed on Vercel. Home, What's new, Privacy, Terms, the job index
-page, the download page (`/download`, every file by system), the job pages (`/jobs` by area and state, `/companies`, open US jobs from the
-index with filters and "Open in Weavenly"), the Windows page, What's next after a download, the H-1B sponsor pages (`/h1b`, one per employer with 20+
+page, the download page (`/download`, every file by system), the job pages (`/jobs` by area and state, `/h1b-jobs` for H-1B sponsors' jobs, `/companies`, open US jobs
+from the index with filters and "Open in Weavenly"), the Windows page, What's next after a download, the H-1B sponsor pages (`/h1b`, one per employer with 20+
 filings, built from the published data), H-1B rules now (`/h1b/rules`, dated and sourced), What Weavenly sends (`/what-we-send`, every request the app and
 the extension make), the recruiter check (`/recruiter-check`, scam signs in an email, in the browser), the weekly hiring report
 (`/hiring-report`, one page per week, built from the published report), downloads and the extension link. See
